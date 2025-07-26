@@ -22,6 +22,12 @@ Continue building your app on:
 
 **[https://v0.dev/chat/projects/CARZGOcLhZP](https://v0.dev/chat/projects/CARZGOcLhZP)**
 
+## Visual Interference Patterns
+
+The viewer now shades edges and vertices with dynamic colors generated from
+their positions. Sinusoidal interference creates subtle gradients across each
+shape, adding depth and variety to the visualization.
+
 ## How It Works
 
 1. Create and modify your project using [v0.dev](https://v0.dev)
