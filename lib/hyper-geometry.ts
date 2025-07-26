@@ -22,6 +22,7 @@ export type HyperVector = Vector4D | Vector5D
 export interface HyperGeometry {
   vertices: HyperVector[]
   edges: [number, number][]
+  faces: [number, number, number][]
 }
 
 // Utility function to validate numbers
@@ -33,6 +34,7 @@ function isValidNumber(value: any): value is number {
 export function generateTesseract(): HyperGeometry {
   const vertices: Vector4D[] = []
   const edges: [number, number][] = []
+  const faces: [number, number, number][] = []
 
   // Generate 16 vertices of tesseract
   for (let i = 0; i < 16; i++) {
@@ -62,7 +64,43 @@ export function generateTesseract(): HyperGeometry {
     }
   }
 
-  return { vertices, edges }
+  const axisPairs: [number, number][] = [
+    [0, 1],
+    [0, 2],
+    [0, 3],
+    [1, 2],
+    [1, 3],
+    [2, 3],
+  ]
+  const getIndex = (coords: number[]): number => {
+    return (
+      (coords[0] === 1 ? 1 : 0) |
+      (coords[1] === 1 ? 2 : 0) |
+      (coords[2] === 1 ? 4 : 0) |
+      (coords[3] === 1 ? 8 : 0)
+    )
+  }
+  axisPairs.forEach(([a, b]) => {
+    const rest = [0, 1, 2, 3].filter((x) => x !== a && x !== b)
+    ;[-1, 1].forEach((s1) => {
+      ;[-1, 1].forEach((s2) => {
+        const coords = [-1, -1, -1, -1]
+        coords[rest[0]] = s1
+        coords[rest[1]] = s2
+        const v0 = getIndex(coords)
+        coords[a] = 1
+        const v1 = getIndex(coords)
+        coords[b] = 1
+        const v2 = getIndex(coords)
+        coords[a] = -1
+        const v3 = getIndex(coords)
+        faces.push([v0, v1, v2])
+        faces.push([v0, v2, v3])
+      })
+    })
+  })
+
+  return { vertices, edges, faces }
 }
 
 // Generate 4D Pentachoron
@@ -76,13 +114,22 @@ export function generatePentachoron(): HyperGeometry {
   ]
 
   const edges: [number, number][] = []
+  const faces: [number, number, number][] = []
   for (let i = 0; i < vertices.length; i++) {
     for (let j = i + 1; j < vertices.length; j++) {
       edges.push([i, j])
     }
   }
 
-  return { vertices, edges }
+  for (let i = 0; i < vertices.length; i++) {
+    for (let j = i + 1; j < vertices.length; j++) {
+      for (let k = j + 1; k < vertices.length; k++) {
+        faces.push([i, j, k])
+      }
+    }
+  }
+
+  return { vertices, edges, faces }
 }
 
 // Generate 4D Hyperoctahedron
@@ -99,6 +146,7 @@ export function generateHyperOctahedron(): HyperGeometry {
   ]
 
   const edges: [number, number][] = []
+  const faces: [number, number, number][] = []
   for (let i = 0; i < vertices.length; i++) {
     for (let j = i + 1; j < vertices.length; j++) {
       const v1 = vertices[i]
@@ -110,7 +158,24 @@ export function generateHyperOctahedron(): HyperGeometry {
     }
   }
 
-  return { vertices, edges }
+  const axisCombos: [number, number, number][] = [
+    [0, 1, 2],
+    [0, 1, 3],
+    [0, 2, 3],
+    [1, 2, 3],
+  ]
+  const getIndex = (axis: number, sign: number): number => axis * 2 + (sign === 1 ? 0 : 1)
+  axisCombos.forEach(([a, b, c]) => {
+    ;[-1, 1].forEach((sa) => {
+      ;[-1, 1].forEach((sb) => {
+        ;[-1, 1].forEach((sc) => {
+          faces.push([getIndex(a, sa), getIndex(b, sb), getIndex(c, sc)])
+        })
+      })
+    })
+  })
+
+  return { vertices, edges, faces }
 }
 
 // Generate 5D Simplex
@@ -125,13 +190,22 @@ export function generateSimplex5D(): HyperGeometry {
   ]
 
   const edges: [number, number][] = []
+  const faces: [number, number, number][] = []
   for (let i = 0; i < vertices.length; i++) {
     for (let j = i + 1; j < vertices.length; j++) {
       edges.push([i, j])
     }
   }
 
-  return { vertices, edges }
+  for (let i = 0; i < vertices.length; i++) {
+    for (let j = i + 1; j < vertices.length; j++) {
+      for (let k = j + 1; k < vertices.length; k++) {
+        faces.push([i, j, k])
+      }
+    }
+  }
+
+  return { vertices, edges, faces }
 }
 
 // Apply 4D rotations
