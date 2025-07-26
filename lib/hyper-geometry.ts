@@ -19,277 +19,242 @@ export interface Vector5D {
 
 export type HyperVector = Vector4D | Vector5D
 
-export interface HyperGeometry {
+// Base class for hyper-dimensional geometry
+export class HyperGeometry {
   vertices: HyperVector[]
   edges: [number, number][]
   faces: [number, number, number][]
+
+  constructor() {
+    this.vertices = []
+    this.edges = []
+    this.faces = []
+  }
 }
 
-// Utility function to validate numbers
-function isValidNumber(value: any): value is number {
-  return typeof value === "number" && isFinite(value) && !isNaN(value)
-}
-
-// Generate 4D Tesseract (Hypercube)
-export function generateTesseract(): HyperGeometry {
-  const vertices: Vector4D[] = []
-  const edges: [number, number][] = []
-  const faces: [number, number, number][] = []
-
-  // Generate 16 vertices of tesseract
-  for (let i = 0; i < 16; i++) {
-    vertices.push({
-      x: i & 1 ? 1 : -1,
-      y: i & 2 ? 1 : -1,
-      z: i & 4 ? 1 : -1,
-      w: i & 8 ? 1 : -1,
-    })
+// 4D Tesseract (Hypercube)
+class Tesseract extends HyperGeometry {
+  constructor() {
+    super()
+    this.generateVertices()
+    this.generateEdges()
+    this.generateFaces()
   }
 
-  // Generate edges
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      const v1 = vertices[i]
-      const v2 = vertices[j]
-
-      let differences = 0
-      if (v1.x !== v2.x) differences++
-      if (v1.y !== v2.y) differences++
-      if (v1.z !== v2.z) differences++
-      if (v1.w !== v2.w) differences++
-
-      if (differences === 1) {
-        edges.push([i, j])
-      }
-    }
-  }
-
-  const axisPairs: [number, number][] = [
-    [0, 1],
-    [0, 2],
-    [0, 3],
-    [1, 2],
-    [1, 3],
-    [2, 3],
-  ]
-  const getIndex = (coords: number[]): number => {
-    return (
-      (coords[0] === 1 ? 1 : 0) |
-      (coords[1] === 1 ? 2 : 0) |
-      (coords[2] === 1 ? 4 : 0) |
-      (coords[3] === 1 ? 8 : 0)
-    )
-  }
-  axisPairs.forEach(([a, b]) => {
-    const rest = [0, 1, 2, 3].filter((x) => x !== a && x !== b)
-    ;[-1, 1].forEach((s1) => {
-      ;[-1, 1].forEach((s2) => {
-        const coords = [-1, -1, -1, -1]
-        coords[rest[0]] = s1
-        coords[rest[1]] = s2
-        const v0 = getIndex(coords)
-        coords[a] = 1
-        const v1 = getIndex(coords)
-        coords[b] = 1
-        const v2 = getIndex(coords)
-        coords[a] = -1
-        const v3 = getIndex(coords)
-        faces.push([v0, v1, v2])
-        faces.push([v0, v2, v3])
+  private generateVertices() {
+    for (let i = 0; i < 16; i++) {
+      this.vertices.push({
+        x: i & 1 ? 1 : -1,
+        y: i & 2 ? 1 : -1,
+        z: i & 4 ? 1 : -1,
+        w: i & 8 ? 1 : -1,
       })
-    })
-  })
-
-  return { vertices, edges, faces }
-}
-
-// Generate 4D Pentachoron
-export function generatePentachoron(): HyperGeometry {
-  const vertices: Vector4D[] = [
-    { x: 1, y: 1, z: 1, w: -0.5 },
-    { x: 1, y: -1, z: -1, w: -0.5 },
-    { x: -1, y: 1, z: -1, w: -0.5 },
-    { x: -1, y: -1, z: 1, w: -0.5 },
-    { x: 0, y: 0, z: 0, w: 1.5 },
-  ]
-
-  const edges: [number, number][] = []
-  const faces: [number, number, number][] = []
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      edges.push([i, j])
     }
   }
 
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      for (let k = j + 1; k < vertices.length; k++) {
-        faces.push([i, j, k])
+  private generateEdges() {
+    for (let i = 0; i < this.vertices.length; i++) {
+      for (let j = i + 1; j < this.vertices.length; j++) {
+        const v1 = this.vertices[i] as Vector4D
+        const v2 = this.vertices[j] as Vector4D
+
+        let differences = 0
+        if (v1.x !== v2.x) differences++
+        if (v1.y !== v2.y) differences++
+        if (v1.z !== v2.z) differences++
+        if (v1.w !== v2.w) differences++
+
+        if (differences === 1) {
+          this.edges.push([i, j])
+        }
       }
     }
   }
 
-  return { vertices, edges, faces }
-}
-
-// Generate 4D Hyperoctahedron
-export function generateHyperOctahedron(): HyperGeometry {
-  const vertices: Vector4D[] = [
-    { x: 1, y: 0, z: 0, w: 0 },
-    { x: -1, y: 0, z: 0, w: 0 },
-    { x: 0, y: 1, z: 0, w: 0 },
-    { x: 0, y: -1, z: 0, w: 0 },
-    { x: 0, y: 0, z: 1, w: 0 },
-    { x: 0, y: 0, z: -1, w: 0 },
-    { x: 0, y: 0, z: 0, w: 1 },
-    { x: 0, y: 0, z: 0, w: -1 },
-  ]
-
-  const edges: [number, number][] = []
-  const faces: [number, number, number][] = []
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      const v1 = vertices[i]
-      const v2 = vertices[j]
-      const dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w
-      if (Math.abs(dot) < 0.001) {
-        edges.push([i, j])
-      }
+  private generateFaces() {
+    const axisPairs: [number, number][] = [
+      [0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3],
+    ]
+    const getIndex = (coords: number[]): number => {
+      return (
+        (coords[0] === 1 ? 1 : 0) |
+        (coords[1] === 1 ? 2 : 0) |
+        (coords[2] === 1 ? 4 : 0) |
+        (coords[3] === 1 ? 8 : 0)
+      )
     }
-  }
-
-  const axisCombos: [number, number, number][] = [
-    [0, 1, 2],
-    [0, 1, 3],
-    [0, 2, 3],
-    [1, 2, 3],
-  ]
-  const getIndex = (axis: number, sign: number): number => axis * 2 + (sign === 1 ? 0 : 1)
-  axisCombos.forEach(([a, b, c]) => {
-    ;[-1, 1].forEach((sa) => {
-      ;[-1, 1].forEach((sb) => {
-        ;[-1, 1].forEach((sc) => {
-          faces.push([getIndex(a, sa), getIndex(b, sb), getIndex(c, sc)])
+    axisPairs.forEach(([a, b]) => {
+      const rest = [0, 1, 2, 3].filter((x) => x !== a && x !== b)
+      ;[-1, 1].forEach((s1) => {
+        ;[-1, 1].forEach((s2) => {
+          const coords = [-1, -1, -1, -1]
+          coords[rest[0]] = s1
+          coords[rest[1]] = s2
+          const v0 = getIndex(coords)
+          coords[a] = 1
+          const v1 = getIndex(coords)
+          coords[b] = 1
+          const v2 = getIndex(coords)
+          coords[a] = -1
+          const v3 = getIndex(coords)
+          this.faces.push([v0, v1, v2])
+          this.faces.push([v0, v2, v3])
         })
       })
     })
-  })
-
-  return { vertices, edges, faces }
+  }
 }
 
-// Generate 5D Simplex
-export function generateSimplex5D(): HyperGeometry {
-  const vertices: Vector5D[] = [
-    { x: 1, y: 0, z: 0, w: 0, v: 0 },
-    { x: 0, y: 1, z: 0, w: 0, v: 0 },
-    { x: 0, y: 0, z: 1, w: 0, v: 0 },
-    { x: 0, y: 0, z: 0, w: 1, v: 0 },
-    { x: 0, y: 0, z: 0, w: 0, v: 1 },
-    { x: -0.5, y: -0.5, z: -0.5, w: -0.5, v: -0.5 },
-  ]
-
-  const edges: [number, number][] = []
-  const faces: [number, number, number][] = []
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      edges.push([i, j])
-    }
+// 4D Pentachoron
+class Pentachoron extends HyperGeometry {
+  constructor() {
+    super()
+    this.vertices = [
+      { x: 1, y: 1, z: 1, w: -0.5 },
+      { x: 1, y: -1, z: -1, w: -0.5 },
+      { x: -1, y: 1, z: -1, w: -0.5 },
+      { x: -1, y: -1, z: 1, w: -0.5 },
+      { x: 0, y: 0, z: 0, w: 1.5 },
+    ]
+    this.generateEdgesAndFaces()
   }
 
-  for (let i = 0; i < vertices.length; i++) {
-    for (let j = i + 1; j < vertices.length; j++) {
-      for (let k = j + 1; k < vertices.length; k++) {
-        faces.push([i, j, k])
+  private generateEdgesAndFaces() {
+    for (let i = 0; i < this.vertices.length; i++) {
+      for (let j = i + 1; j < this.vertices.length; j++) {
+        this.edges.push([i, j])
+        for (let k = j + 1; k < this.vertices.length; k++) {
+          this.faces.push([i, j, k])
+        }
+      }
+    }
+  }
+}
+
+// 4D Hyperoctahedron
+class HyperOctahedron extends HyperGeometry {
+  constructor() {
+    super()
+    this.vertices = [
+      { x: 1, y: 0, z: 0, w: 0 }, { x: -1, y: 0, z: 0, w: 0 },
+      { x: 0, y: 1, z: 0, w: 0 }, { x: 0, y: -1, z: 0, w: 0 },
+      { x: 0, y: 0, z: 1, w: 0 }, { x: 0, y: 0, z: -1, w: 0 },
+      { x: 0, y: 0, z: 0, w: 1 }, { x: 0, y: 0, z: 0, w: -1 },
+    ]
+    this.generateEdges()
+    this.generateFaces()
+  }
+
+  private generateEdges() {
+    for (let i = 0; i < this.vertices.length; i++) {
+      for (let j = i + 1; j < this.vertices.length; j++) {
+        const v1 = this.vertices[i] as Vector4D
+        const v2 = this.vertices[j] as Vector4D
+        const dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w
+        if (Math.abs(dot) < 0.001) {
+          this.edges.push([i, j])
+        }
       }
     }
   }
 
-  return { vertices, edges, faces }
+  private generateFaces() {
+    const axisCombos: [number, number, number][] = [
+      [0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3],
+    ]
+    const getIndex = (axis: number, sign: number): number => axis * 2 + (sign === 1 ? 0 : 1)
+    axisCombos.forEach(([a, b, c]) => {
+      ;[-1, 1].forEach((sa) => {
+        ;[-1, 1].forEach((sb) => {
+          ;[-1, 1].forEach((sc) => {
+            this.faces.push([getIndex(a, sa), getIndex(b, sb), getIndex(c, sc)])
+          })
+        })
+      })
+    })
+  }
+}
+
+// 5D Simplex
+class Simplex5D extends HyperGeometry {
+  constructor() {
+    super()
+    this.vertices = [
+      { x: 1, y: 0, z: 0, w: 0, v: 0 },
+      { x: 0, y: 1, z: 0, w: 0, v: 0 },
+      { x: 0, y: 0, z: 1, w: 0, v: 0 },
+      { x: 0, y: 0, z: 0, w: 1, v: 0 },
+      { x: 0, y: 0, z: 0, w: 0, v: 1 },
+      { x: -0.5, y: -0.5, z: -0.5, w: -0.5, v: -0.5 },
+    ]
+    this.generateEdgesAndFaces()
+  }
+
+  private generateEdgesAndFaces() {
+    for (let i = 0; i < this.vertices.length; i++) {
+      for (let j = i + 1; j < this.vertices.length; j++) {
+        this.edges.push([i, j])
+        for (let k = j + 1; k < this.vertices.length; k++) {
+          this.faces.push([i, j, k])
+        }
+      }
+    }
+  }
+}
+
+// Factory function to generate shapes
+export function generateShape(shapeType: string): HyperGeometry {
+  switch (shapeType) {
+    case "tesseract":
+      return new Tesseract()
+    case "pentachoron":
+      return new Pentachoron()
+    case "hyperoctahedron":
+      return new HyperOctahedron()
+    case "simplex5d":
+      return new Simplex5D()
+    default:
+      throw new Error(`Unknown shape type: ${shapeType}`)
+  }
 }
 
 // Apply 4D rotations
 function rotate4D(vector: Vector4D, rotations: TransformState["rotation4D"]): Vector4D {
   let { x, y, z, w } = vector
+  const rotationPlanes = Object.keys(rotations) as (keyof TransformState["rotation4D"])[]
 
-  // XY rotation
-  if (rotations.xy !== 0) {
-    const cos = Math.cos(rotations.xy)
-    const sin = Math.sin(rotations.xy)
-    const newX = x * cos - y * sin
-    const newY = x * sin + y * cos
-    x = newX
-    y = newY
-  }
+  rotationPlanes.forEach(plane => {
+    const angle = rotations[plane]
+    if(angle === 0) return;
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    let c1, c2;
 
-  // XZ rotation
-  if (rotations.xz !== 0) {
-    const cos = Math.cos(rotations.xz)
-    const sin = Math.sin(rotations.xz)
-    const newX = x * cos - z * sin
-    const newZ = x * sin + z * cos
-    x = newX
-    z = newZ
-  }
+    switch(plane) {
+        case "xy": c1 = "x"; c2 = "y"; break;
+        case "xz": c1 = "x"; c2 = "z"; break;
+        case "xw": c1 = "x"; c2 = "w"; break;
+        case "yz": c1 = "y"; c2 = "z"; break;
+        case "yw": c1 = "y"; c2 = "w"; break;
+        case "zw": c1 = "z"; c2 = "w"; break;
+    }
 
-  // XW rotation
-  if (rotations.xw !== 0) {
-    const cos = Math.cos(rotations.xw)
-    const sin = Math.sin(rotations.xw)
-    const newX = x * cos - w * sin
-    const newW = x * sin + w * cos
-    x = newX
-    w = newW
-  }
+    const val1 = vector[c1]
+    const val2 = vector[c2]
+    vector[c1] = val1 * cos - val2 * sin
+    vector[c2] = val1 * sin + val2 * cos
+  })
 
-  // YZ rotation
-  if (rotations.yz !== 0) {
-    const cos = Math.cos(rotations.yz)
-    const sin = Math.sin(rotations.yz)
-    const newY = y * cos - z * sin
-    const newZ = y * sin + z * cos
-    y = newY
-    z = newZ
-  }
-
-  // YW rotation
-  if (rotations.yw !== 0) {
-    const cos = Math.cos(rotations.yw)
-    const sin = Math.sin(rotations.yw)
-    const newY = y * cos - w * sin
-    const newW = y * sin + w * cos
-    y = newY
-    w = newW
-  }
-
-  // ZW rotation
-  if (rotations.zw !== 0) {
-    const cos = Math.cos(rotations.zw)
-    const sin = Math.sin(rotations.zw)
-    const newZ = z * cos - w * sin
-    const newW = z * sin + w * cos
-    z = newZ
-    w = newW
-  }
-
-  return { x, y, z, w }
+  return vector
 }
 
 // Apply 5D rotations
 function rotate5D(vector: Vector5D, rotations: TransformState["rotation5D"]): Vector5D {
   const coords = { ...vector }
-
   const rotationPairs = [
-    ["xy", "x", "y"],
-    ["xz", "x", "z"],
-    ["xw", "x", "w"],
-    ["xv", "x", "v"],
-    ["yz", "y", "z"],
-    ["yw", "y", "w"],
-    ["yv", "y", "v"],
-    ["zw", "z", "w"],
-    ["zv", "z", "v"],
-    ["wv", "w", "v"],
+    ["xy", "x", "y"], ["xz", "x", "z"], ["xw", "x", "w"], ["xv", "x", "v"],
+    ["yz", "y", "z"], ["yw", "y", "w"], ["yv", "y", "v"], ["zw", "z", "w"],
+    ["zv", "z", "v"], ["wv", "w", "v"],
   ] as const
 
   rotationPairs.forEach(([planeName, axis1, axis2]) => {
@@ -311,8 +276,10 @@ function rotate5D(vector: Vector5D, rotations: TransformState["rotation5D"]): Ve
 export function applyRotations(vertices: HyperVector[], transforms: TransformState, dimension: 4 | 5): HyperVector[] {
   return vertices.map((vertex) => {
     if (dimension === 4) {
+      if (!("w" in vertex)) throw new Error("Applying 4D rotation to a non-4D vector");
       return rotate4D(vertex as Vector4D, transforms.rotation4D)
     } else {
+      if (!("v" in vertex)) throw new Error("Applying 5D rotation to a non-5D vector");
       return rotate5D(vertex as Vector5D, transforms.rotation5D)
     }
   })
@@ -325,14 +292,22 @@ export function projectToThreeD(vertex: HyperVector, distance: number): Vector3 
   if ("v" in vertex) {
     // 5D to 3D projection
     const { x, y, z, w, v } = vertex as Vector5D
-    const factor1 = safeDistance / (safeDistance + w)
-    const factor2 = safeDistance / (safeDistance + v)
-    const finalFactor = factor1 * factor2
+    if([x,y,z,w,v].some(val => typeof val !== 'number' || !isFinite(val))) {
+        console.error("Invalid 5D vector components for projection:", vertex);
+        return new Vector3(0,0,0);
+    }
+    const factorW = safeDistance / (safeDistance + w)
+    const factorV = safeDistance / (safeDistance + v)
+    const finalFactor = factorW * factorV
 
     return new Vector3(x * finalFactor, y * finalFactor, z * finalFactor)
   } else {
     // 4D to 3D projection
     const { x, y, z, w } = vertex as Vector4D
+    if([x,y,z,w].some(val => typeof val !== 'number' || !isFinite(val))) {
+        console.error("Invalid 4D vector components for projection:", vertex);
+        return new Vector3(0,0,0);
+    }
     const factor = safeDistance / (safeDistance + w)
 
     return new Vector3(x * factor, y * factor, z * factor)
