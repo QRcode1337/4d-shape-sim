@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Stars } from "@react-three/drei"
+import { AxesHelper } from "@/lib/three"
 import HyperShape from "@/components/hyper-shape"
 import ControlPanel from "@/components/control-panel"
 import CrossSectionPanel from "@/components/cross-section-panel"
@@ -55,6 +56,8 @@ export default function HyperDimensionalVisualizer() {
   const [animationSpeed, setAnimationSpeed] = useState(0.5)
   const [isAutoRotating, setIsAutoRotating] = useState(true)
 
+  const axesHelper = useMemo(() => new AxesHelper(4), [])
+
   const handleTransformChange = useCallback((newTransforms: Partial<TransformState>) => {
     setTransforms((prev) => ({ ...prev, ...newTransforms }))
   }, [])
@@ -75,7 +78,8 @@ export default function HyperDimensionalVisualizer() {
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
       <Canvas camera={{ position: [0, 0, 8], fov: 75 }} className="absolute inset-0">
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+        <fog attach="fog" args={["#000", 10, 25]} />
+        <Stars radius={100} depth={50} count={7000} factor={5} saturation={0} fade speed={1} />
         <ambientLight intensity={1.2} />
         <directionalLight position={[10, 10, 5]} intensity={1.5} />
         <pointLight position={[-10, -10, -10]} intensity={2} color="#4f46e5" />
@@ -97,6 +101,7 @@ export default function HyperDimensionalVisualizer() {
           showVertices={showVertices}
         />
 
+        <primitive object={axesHelper} />
         <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={20} />
       </Canvas>
 
