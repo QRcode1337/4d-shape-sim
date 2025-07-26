@@ -3,7 +3,7 @@
 import { useRef, useMemo } from "react"
 import { useFrame } from "@react-three/fiber"
 import { type Group, BufferGeometry, BufferAttribute, Color } from "@/lib/three"
-import type { ShapeType, TransformState, CrossSectionState } from "@/app/page"
+import type { ShapeType, TransformState } from "@/app/page"
 import {
   generateTesseract,
   generatePentachoron,
@@ -11,7 +11,6 @@ import {
   generateSimplex5D,
   projectToThreeD,
   applyRotations,
-  applyCrossSection,
 } from "@/lib/hyper-geometry"
 
 const shapeColors: Record<ShapeType, string> = {
@@ -25,7 +24,6 @@ interface HyperShapeProps {
   shapeType: ShapeType
   dimension: 4 | 5
   transforms: TransformState
-  crossSection: CrossSectionState
   wireframe: boolean
   showVertices: boolean
 }
@@ -34,7 +32,6 @@ export default function HyperShape({
   shapeType,
   dimension,
   transforms,
-  crossSection,
   wireframe,
   showVertices,
 }: HyperShapeProps) {
@@ -69,21 +66,6 @@ export default function HyperShape({
       shapeDim,
     )
     let transformedEdges = baseGeometry.edges
-
-    // 3. Apply cross-section
-    if (crossSection.enabled) {
-      const adjustedCross = {
-        ...crossSection,
-        dimension: Math.min(crossSection.dimension, shapeDim - 1),
-      }
-      const result = applyCrossSection(
-        transformedVertices,
-        transformedEdges,
-        adjustedCross,
-      )
-      transformedVertices = result.vertices
-      transformedEdges = result.edges
-    }
 
     // 4. Project to 3D
     const projectedVertices = transformedVertices
@@ -162,7 +144,7 @@ export default function HyperShape({
     }
 
     return { lineGeometry: lineGeom, pointsGeometry: pointsGeom }
-  }, [shapeType, dimension, transforms, crossSection, wireframe, showVertices])
+  }, [shapeType, dimension, transforms, wireframe, showVertices])
 
   // Apply scale transformation per frame
   useFrame(() => {

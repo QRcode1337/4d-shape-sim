@@ -1,5 +1,5 @@
 import { Vector3 } from "@/lib/three"
-import type { TransformState, CrossSectionState } from "@/app/page"
+import type { TransformState } from "@/app/page"
 
 // Higher-dimensional vector types
 export interface Vector4D {
@@ -263,49 +263,4 @@ export function projectToThreeD(vertex: HyperVector, distance: number): Vector3 
 
     return new Vector3(x * factor, y * factor, z * factor)
   }
-}
-
-// Apply cross-section filtering
-export function applyCrossSection(
-  vertices: HyperVector[],
-  edges: [number, number][],
-  crossSection: CrossSectionState,
-): { vertices: HyperVector[]; edges: [number, number][] } {
-  if (!crossSection.enabled) {
-    return { vertices, edges }
-  }
-
-  const { dimension, position, thickness } = crossSection
-  const halfThickness = thickness / 2
-
-  // Filter vertices
-  const filteredVertices: HyperVector[] = []
-  const vertexMap: Map<number, number> = new Map()
-
-  vertices.forEach((vertex, index) => {
-    const coords = [vertex.x, vertex.y, vertex.z, vertex.w, "v" in vertex ? vertex.v : 0]
-    const coord = coords[dimension] || 0
-
-    if (Math.abs(coord - position) <= halfThickness) {
-      vertexMap.set(index, filteredVertices.length)
-      filteredVertices.push(vertex)
-    }
-  })
-
-  if (filteredVertices.length === 0) {
-    return { vertices, edges }
-  }
-
-  // Filter edges
-  const filteredEdges: [number, number][] = []
-  edges.forEach(([start, end]) => {
-    const newStart = vertexMap.get(start)
-    const newEnd = vertexMap.get(end)
-
-    if (newStart !== undefined && newEnd !== undefined) {
-      filteredEdges.push([newStart, newEnd])
-    }
-  })
-
-  return { vertices: filteredVertices, edges: filteredEdges }
 }
