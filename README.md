@@ -35,8 +35,6 @@ shape, adding depth and variety to the visualization.
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
 
-
-<<<<<<< j9hwzc-codex/add-visual-variety-using-shaders
 ## Filled Faces
 
 Each shape now includes semi-transparent surfaces to better convey volume.
@@ -48,6 +46,3 @@ the edges and points.
 The application no longer pulls Google fonts at build time. It falls back to
 your system's default sans-serif stack, preventing blocked font requests during
 deployment.
-
-=======
->>>>>>> main
