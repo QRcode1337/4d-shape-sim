@@ -6,7 +6,6 @@ import { OrbitControls, Stars } from "@react-three/drei"
 import { AxesHelper } from "@/lib/three"
 import HyperShape from "@/components/hyper-shape"
 import ControlPanel from "@/components/control-panel"
-import CrossSectionPanel from "@/components/cross-section-panel"
 import AnimationController from "@/components/animation-controller"
 
 export type ShapeType = "tesseract" | "pentachoron" | "hyperoctahedron" | "simplex5d"
@@ -29,12 +28,6 @@ export interface TransformState {
   projectionDistance: number
 }
 
-export interface CrossSectionState {
-  enabled: boolean
-  dimension: number
-  position: number
-  thickness: number
-}
 
 export default function HyperDimensionalVisualizer() {
   const [currentShape, setCurrentShape] = useState<ShapeType>("tesseract")
@@ -45,12 +38,6 @@ export default function HyperDimensionalVisualizer() {
     scale: 1,
     projectionDistance: 4,
   })
-  const [crossSection, setCrossSection] = useState<CrossSectionState>({
-    enabled: false,
-    dimension: 0,
-    position: 0,
-    thickness: 0.1,
-  })
   const [wireframe, setWireframe] = useState(true)
   const [showVertices, setShowVertices] = useState(true)
   const [animationSpeed, setAnimationSpeed] = useState(0.5)
@@ -60,10 +47,6 @@ export default function HyperDimensionalVisualizer() {
 
   const handleTransformChange = useCallback((newTransforms: Partial<TransformState>) => {
     setTransforms((prev) => ({ ...prev, ...newTransforms }))
-  }, [])
-
-  const handleCrossSectionChange = useCallback((newCrossSection: Partial<CrossSectionState>) => {
-    setCrossSection((prev) => ({ ...prev, ...newCrossSection }))
   }, [])
 
   const resetTransforms = useCallback(() => {
@@ -96,7 +79,6 @@ export default function HyperDimensionalVisualizer() {
           shapeType={currentShape}
           dimension={dimension}
           transforms={transforms}
-          crossSection={crossSection}
           wireframe={wireframe}
           showVertices={showVertices}
         />
@@ -123,7 +105,6 @@ export default function HyperDimensionalVisualizer() {
         onReset={resetTransforms}
       />
 
-      <CrossSectionPanel crossSection={crossSection} dimension={dimension} onChange={handleCrossSectionChange} />
 
       <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm text-white p-4 rounded-lg max-w-sm">
         <h1 className="text-xl font-bold mb-2">Hyperdimensional Visualizer</h1>
