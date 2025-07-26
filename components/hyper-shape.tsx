@@ -2,7 +2,7 @@
 
 import { useRef, useMemo } from "react"
 import { useFrame } from "@react-three/fiber"
-import { type Group, BufferGeometry, BufferAttribute } from "@/lib/three"
+import { type Group, BufferGeometry, BufferAttribute, Color } from "@/lib/three"
 import type { ShapeType, TransformState, CrossSectionState } from "@/app/page"
 import {
   generateTesseract,
@@ -13,6 +13,13 @@ import {
   applyRotations,
   applyCrossSection,
 } from "@/lib/hyper-geometry"
+
+const shapeColors: Record<ShapeType, string> = {
+  tesseract: "#4f46e5",
+  pentachoron: "#10b981",
+  hyperoctahedron: "#f59e0b",
+  simplex5d: "#e11d48",
+}
 
 interface HyperShapeProps {
   shapeType: ShapeType
@@ -32,6 +39,7 @@ export default function HyperShape({
   showVertices,
 }: HyperShapeProps) {
   const groupRef = useRef<Group>(null)
+  const lineColor = shapeColors[shapeType]
 
   const { lineGeometry, pointsGeometry } = useMemo(() => {
     // 1. Generate base geometry
@@ -116,14 +124,18 @@ export default function HyperShape({
       {/* A single object for all lines */}
       {wireframe && lineGeometry.attributes.position && (
         <lineSegments geometry={lineGeometry}>
-          <lineBasicMaterial color="#00ffff" transparent opacity={0.5} />
+          <lineBasicMaterial
+            color={lineColor}
+            transparent
+            opacity={0.6}
+          />
         </lineSegments>
       )}
 
       {/* A single object for all points */}
       {showVertices && pointsGeometry.attributes.position && (
         <points geometry={pointsGeometry}>
-          <pointsMaterial color="#ffffff" size={0.1} sizeAttenuation />
+          <pointsMaterial color={lineColor} size={0.1} sizeAttenuation />
         </points>
       )}
     </group>
