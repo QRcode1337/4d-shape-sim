@@ -225,7 +225,7 @@ function rotate4D(vector: Vector4D, rotations: TransformState["rotation4D"]): Ve
 
   rotationPlanes.forEach(plane => {
     const angle = rotations[plane]
-    if(angle === 0) return;
+    if (angle === 0) return;
     const cos = Math.cos(angle)
     const sin = Math.sin(angle)
     let c1, c2;
