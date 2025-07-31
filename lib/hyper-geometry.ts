@@ -237,6 +237,7 @@ function rotate4D(vector: Vector4D, rotations: TransformState["rotation4D"]): Ve
         case "yz": c1 = "y"; c2 = "z"; break;
         case "yw": c1 = "y"; c2 = "w"; break;
         case "zw": c1 = "z"; c2 = "w"; break;
+        default: throw new Error(`Invalid rotation plane: ${plane}`);
     }
 
     const val1 = vector[c1]
