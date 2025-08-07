@@ -2,16 +2,12 @@
 
 import { useRef, useMemo } from "react"
 import { useFrame } from "@react-three/fiber"
-import { type Group, BufferGeometry, BufferAttribute, Color } from "@/lib/three"
-import type { ShapeType, TransformState, CrossSectionState } from "@/app/page"
+import { type Group, BufferGeometry, BufferAttribute, Color, DoubleSide } from "@/lib/three"
+import type { ShapeType, TransformState } from "@/app/page"
 import {
-  generateTesseract,
-  generatePentachoron,
-  generateHyperOctahedron,
-  generateSimplex5D,
+  generateShape,
   projectToThreeD,
   applyRotations,
-  applyCrossSection,
 } from "@/lib/hyper-geometry"
 
 const shapeColors: Record<ShapeType, string> = {
@@ -25,7 +21,6 @@ interface HyperShapeProps {
   shapeType: ShapeType
   dimension: 4 | 5
   transforms: TransformState
-  crossSection: CrossSectionState
   wireframe: boolean
   showVertices: boolean
 }
@@ -34,43 +29,25 @@ export default function HyperShape({
   shapeType,
   dimension,
   transforms,
-  crossSection,
   wireframe,
   showVertices,
 }: HyperShapeProps) {
   const groupRef = useRef<Group>(null)
   const lineColor = shapeColors[shapeType]
+  const shapeDim = shapeType === "simplex5d" ? 5 : 4
 
-  const { lineGeometry, pointsGeometry } = useMemo(() => {
+  const { lineGeometry, pointsGeometry, faceGeometry } = useMemo(() => {
     // 1. Generate base geometry
-    let baseGeometry
-    switch (shapeType) {
-      case "tesseract":
-        baseGeometry = generateTesseract()
-        break
-      case "pentachoron":
-        baseGeometry = generatePentachoron()
-        break
-      case "hyperoctahedron":
-        baseGeometry = generateHyperOctahedron()
-        break
-      case "simplex5d":
-        baseGeometry = generateSimplex5D()
-        break
-      default:
-        baseGeometry = generateTesseract()
-    }
+    const baseGeometry = generateShape(shapeType)
 
     // 2. Apply transformations
-    let transformedVertices = applyRotations(baseGeometry.vertices, transforms, dimension)
+    let transformedVertices = applyRotations(
+      baseGeometry.vertices,
+      transforms,
+      shapeDim,
+    )
     let transformedEdges = baseGeometry.edges
-
-    // 3. Apply cross-section
-    if (crossSection.enabled) {
-      const result = applyCrossSection(transformedVertices, transformedEdges, crossSection)
-      transformedVertices = result.vertices
-      transformedEdges = result.edges
-    }
+    let faces = baseGeometry.faces
 
     // 4. Project to 3D
     const projectedVertices = transformedVertices
@@ -148,8 +125,43 @@ export default function HyperShape({
       )
     }
 
-    return { lineGeometry: lineGeom, pointsGeometry: pointsGeom }
-  }, [shapeType, dimension, transforms, crossSection, wireframe, showVertices])
+    const facePositions: number[] = []
+    const faceColors: number[] = []
+    if (faces && faces.length > 0) {
+      faces.forEach(([a, b, c]) => {
+        const pa = projectedVertices[a]
+        const pb = projectedVertices[b]
+        const pc = projectedVertices[c]
+        if (pa && pb && pc) {
+          facePositions.push(pa.x, pa.y, pa.z, pb.x, pb.y, pb.z, pc.x, pc.y, pc.z)
+
+          const vertList = [pa, pb, pc]
+          vertList.forEach((v) => {
+            const intensity =
+              (Math.sin(v.x * 5) + Math.sin(v.y * 5) + Math.sin(v.z * 5)) / 3
+            const color = new Color(lineColor)
+            color.offsetHSL(intensity * 0.1, 0, intensity * 0.2)
+            faceColors.push(color.r, color.g, color.b)
+          })
+        }
+      })
+    }
+
+    const faceGeom = new BufferGeometry()
+    if (facePositions.length > 0) {
+      faceGeom.setAttribute(
+        "position",
+        new BufferAttribute(new Float32Array(facePositions), 3),
+      )
+      faceGeom.setAttribute(
+        "color",
+        new BufferAttribute(new Float32Array(faceColors), 3),
+      )
+      faceGeom.computeVertexNormals()
+    }
+
+    return { lineGeometry: lineGeom, pointsGeometry: pointsGeom, faceGeometry: faceGeom }
+  }, [shapeType, dimension, transforms, wireframe, showVertices])
 
   // Apply scale transformation per frame
   useFrame(() => {
@@ -169,6 +181,17 @@ export default function HyperShape({
             vertexColors
           />
         </lineSegments>
+      )}
+
+      {faceGeometry.attributes.position && (
+        <mesh geometry={faceGeometry}>
+          <meshStandardMaterial
+            side={DoubleSide}
+            transparent
+            opacity={0.3}
+            vertexColors
+          />
+        </mesh>
       )}
 
       {/* A single object for all points */}

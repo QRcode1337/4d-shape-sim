@@ -6,6 +6,7 @@ export {
   BufferGeometry,
   BufferAttribute,
   Color,
+  DoubleSide,
   AxesHelper,
 } from "three"
 export type { Group } from "three"

@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Stars } from "@react-three/drei"
 import { AxesHelper } from "@/lib/three"
 import HyperShape from "@/components/hyper-shape"
 import ControlPanel from "@/components/control-panel"
-import CrossSectionPanel from "@/components/cross-section-panel"
 import AnimationController from "@/components/animation-controller"
+import { useTransformState } from "@/hooks/use-transform-state"
 
 export type ShapeType = "tesseract" | "pentachoron" | "hyperoctahedron" | "simplex5d"
 
@@ -29,51 +29,17 @@ export interface TransformState {
   projectionDistance: number
 }
 
-export interface CrossSectionState {
-  enabled: boolean
-  dimension: number
-  position: number
-  thickness: number
-}
 
 export default function HyperDimensionalVisualizer() {
   const [currentShape, setCurrentShape] = useState<ShapeType>("tesseract")
   const [dimension, setDimension] = useState<4 | 5>(4)
-  const [transforms, setTransforms] = useState<TransformState>({
-    rotation4D: { xy: 0, xz: 0, xw: 0, yz: 0, yw: 0, zw: 0 },
-    rotation5D: { xy: 0, xz: 0, xw: 0, xv: 0, yz: 0, yw: 0, yv: 0, zw: 0, zv: 0, wv: 0 },
-    scale: 1,
-    projectionDistance: 4,
-  })
-  const [crossSection, setCrossSection] = useState<CrossSectionState>({
-    enabled: false,
-    dimension: 0,
-    position: 0,
-    thickness: 0.1,
-  })
+  const { transforms, handleTransformChange, resetTransforms } = useTransformState()
   const [wireframe, setWireframe] = useState(true)
   const [showVertices, setShowVertices] = useState(true)
   const [animationSpeed, setAnimationSpeed] = useState(0.5)
   const [isAutoRotating, setIsAutoRotating] = useState(true)
 
   const axesHelper = useMemo(() => new AxesHelper(4), [])
-
-  const handleTransformChange = useCallback((newTransforms: Partial<TransformState>) => {
-    setTransforms((prev) => ({ ...prev, ...newTransforms }))
-  }, [])
-
-  const handleCrossSectionChange = useCallback((newCrossSection: Partial<CrossSectionState>) => {
-    setCrossSection((prev) => ({ ...prev, ...newCrossSection }))
-  }, [])
-
-  const resetTransforms = useCallback(() => {
-    setTransforms({
-      rotation4D: { xy: 0, xz: 0, xw: 0, yz: 0, yw: 0, zw: 0 },
-      rotation5D: { xy: 0, xz: 0, xw: 0, xv: 0, yz: 0, yw: 0, yv: 0, zw: 0, zv: 0, wv: 0 },
-      scale: 1,
-      projectionDistance: 4,
-    })
-  }, [])
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
@@ -96,7 +62,6 @@ export default function HyperDimensionalVisualizer() {
           shapeType={currentShape}
           dimension={dimension}
           transforms={transforms}
-          crossSection={crossSection}
           wireframe={wireframe}
           showVertices={showVertices}
         />
@@ -123,7 +88,6 @@ export default function HyperDimensionalVisualizer() {
         onReset={resetTransforms}
       />
 
-      <CrossSectionPanel crossSection={crossSection} dimension={dimension} onChange={handleCrossSectionChange} />
 
       <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm text-white p-4 rounded-lg max-w-sm">
         <h1 className="text-xl font-bold mb-2">Hyperdimensional Visualizer</h1>
