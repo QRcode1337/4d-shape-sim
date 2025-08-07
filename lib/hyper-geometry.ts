@@ -25,6 +25,7 @@ export class HyperGeometry {
   edges: [number, number][]
   faces: [number, number, number][]
 
+
   constructor() {
     this.vertices = []
     this.edges = []
@@ -32,13 +33,7 @@ export class HyperGeometry {
   }
 }
 
-// 4D Tesseract (Hypercube)
-class Tesseract extends HyperGeometry {
-  constructor() {
-    super()
-    this.generateVertices()
-    this.generateEdges()
-    this.generateFaces()
+
   }
 
   private generateVertices() {
@@ -71,17 +66,7 @@ class Tesseract extends HyperGeometry {
     }
   }
 
-  private generateFaces() {
-    const axisPairs: [number, number][] = [
-      [0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3],
-    ]
-    const getIndex = (coords: number[]): number => {
-      return (
-        (coords[0] === 1 ? 1 : 0) |
-        (coords[1] === 1 ? 2 : 0) |
-        (coords[2] === 1 ? 4 : 0) |
-        (coords[3] === 1 ? 8 : 0)
-      )
+
     }
     axisPairs.forEach(([a, b]) => {
       const rest = [0, 1, 2, 3].filter((x) => x !== a && x !== b)
@@ -102,32 +87,6 @@ class Tesseract extends HyperGeometry {
         })
       })
     })
-  }
-}
-
-// 4D Pentachoron
-class Pentachoron extends HyperGeometry {
-  constructor() {
-    super()
-    this.vertices = [
-      { x: 1, y: 1, z: 1, w: -0.5 },
-      { x: 1, y: -1, z: -1, w: -0.5 },
-      { x: -1, y: 1, z: -1, w: -0.5 },
-      { x: -1, y: -1, z: 1, w: -0.5 },
-      { x: 0, y: 0, z: 0, w: 1.5 },
-    ]
-    this.generateEdgesAndFaces()
-  }
-
-  private generateEdgesAndFaces() {
-    for (let i = 0; i < this.vertices.length; i++) {
-      for (let j = i + 1; j < this.vertices.length; j++) {
-        this.edges.push([i, j])
-        for (let k = j + 1; k < this.vertices.length; k++) {
-          this.faces.push([i, j, k])
-        }
-      }
-    }
   }
 }
 

@@ -33,13 +33,14 @@ export interface TransformState {
 export default function HyperDimensionalVisualizer() {
   const [currentShape, setCurrentShape] = useState<ShapeType>("tesseract")
   const [dimension, setDimension] = useState<4 | 5>(4)
-  const { transforms, handleTransformChange, resetTransforms } = useTransformState()
+
   const [wireframe, setWireframe] = useState(true)
   const [showVertices, setShowVertices] = useState(true)
   const [animationSpeed, setAnimationSpeed] = useState(0.5)
   const [isAutoRotating, setIsAutoRotating] = useState(true)
 
   const axesHelper = useMemo(() => new AxesHelper(4), [])
+
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">

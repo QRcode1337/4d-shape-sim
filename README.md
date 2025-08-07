@@ -61,5 +61,23 @@ The viewer now shades edges and vertices with dynamic colors generated from
 their positions. Sinusoidal interference creates subtle gradients across each
 shape, adding depth and variety to the visualization.
 
+## Visual Interference Patterns
+
+The viewer now shades edges and vertices with dynamic colors generated from
+their positions. Sinusoidal interference creates subtle gradients across each
+shape, adding depth and variety to the visualization.
+
+## Filled Faces
+
+Each shape now includes semi-transparent surfaces to better convey volume.
+Dynamic vertex colors give these faces gentle interference patterns similar to
+the edges and points.
+
+## Offline Fonts
+
+The application no longer pulls Google fonts at build time. It falls back to
+your system's default sans-serif stack, preventing blocked font requests during
+deployment.
+
 ## How It Works
 
