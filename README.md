@@ -55,10 +55,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapidly building custom designs.
 - [TypeScript](https://www.typescriptlang.org/) - A typed superset of JavaScript that compiles to plain JavaScript.
 
+## Visual Interference Patterns
+
+The viewer now shades edges and vertices with dynamic colors generated from
+their positions. Sinusoidal interference creates subtle gradients across each
+shape, adding depth and variety to the visualization.
+
 ## How It Works
 
-The application generates the vertices, edges, and faces of higher-dimensional shapes and then projects them into 3D space for rendering.
-
-- **Shape Generation:** The `lib/hyper-geometry.ts` file contains functions to generate the geometry for each shape.
-- **Rotation and Projection:** The vertices of the shapes are rotated in 4D or 5D space and then projected into 3D space using a perspective projection.
-- **Rendering:** The 3D representation of the shapes is rendered using `three.js` and `react-three-fiber`.
