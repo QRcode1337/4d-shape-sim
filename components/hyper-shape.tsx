@@ -5,10 +5,7 @@ import { useFrame } from "@react-three/fiber"
 import { type Group, BufferGeometry, BufferAttribute, Color, DoubleSide } from "@/lib/three"
 import type { ShapeType, TransformState } from "@/app/page"
 import {
-  generateTesseract,
-  generatePentachoron,
-  generateHyperOctahedron,
-  generateSimplex5D,
+  generateShape,
   projectToThreeD,
   applyRotations,
 } from "@/lib/hyper-geometry"
@@ -41,23 +38,7 @@ export default function HyperShape({
 
   const { lineGeometry, pointsGeometry, faceGeometry } = useMemo(() => {
     // 1. Generate base geometry
-    let baseGeometry
-    switch (shapeType) {
-      case "tesseract":
-        baseGeometry = generateTesseract()
-        break
-      case "pentachoron":
-        baseGeometry = generatePentachoron()
-        break
-      case "hyperoctahedron":
-        baseGeometry = generateHyperOctahedron()
-        break
-      case "simplex5d":
-        baseGeometry = generateSimplex5D()
-        break
-      default:
-        baseGeometry = generateTesseract()
-    }
+    const baseGeometry = generateShape(shapeType)
 
     // 2. Apply transformations
     let transformedVertices = applyRotations(

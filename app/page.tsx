@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Stars } from "@react-three/drei"
 import { AxesHelper } from "@/lib/three"
 import HyperShape from "@/components/hyper-shape"
 import ControlPanel from "@/components/control-panel"
 import AnimationController from "@/components/animation-controller"
+import { useTransformState } from "@/hooks/use-transform-state"
 
 export type ShapeType = "tesseract" | "pentachoron" | "hyperoctahedron" | "simplex5d"
 
@@ -32,12 +33,7 @@ export interface TransformState {
 export default function HyperDimensionalVisualizer() {
   const [currentShape, setCurrentShape] = useState<ShapeType>("tesseract")
   const [dimension, setDimension] = useState<4 | 5>(4)
-  const [transforms, setTransforms] = useState<TransformState>({
-    rotation4D: { xy: 0, xz: 0, xw: 0, yz: 0, yw: 0, zw: 0 },
-    rotation5D: { xy: 0, xz: 0, xw: 0, xv: 0, yz: 0, yw: 0, yv: 0, zw: 0, zv: 0, wv: 0 },
-    scale: 1,
-    projectionDistance: 4,
-  })
+
   const [wireframe, setWireframe] = useState(true)
   const [showVertices, setShowVertices] = useState(true)
   const [animationSpeed, setAnimationSpeed] = useState(0.5)
@@ -45,18 +41,6 @@ export default function HyperDimensionalVisualizer() {
 
   const axesHelper = useMemo(() => new AxesHelper(4), [])
 
-  const handleTransformChange = useCallback((newTransforms: Partial<TransformState>) => {
-    setTransforms((prev) => ({ ...prev, ...newTransforms }))
-  }, [])
-
-  const resetTransforms = useCallback(() => {
-    setTransforms({
-      rotation4D: { xy: 0, xz: 0, xw: 0, yz: 0, yw: 0, zw: 0 },
-      rotation5D: { xy: 0, xz: 0, xw: 0, xv: 0, yz: 0, yw: 0, yv: 0, zw: 0, zv: 0, wv: 0 },
-      scale: 1,
-      projectionDistance: 4,
-    })
-  }, [])
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
